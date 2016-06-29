@@ -1,7 +1,7 @@
-var $container = $('#container');
+var $container = $("#container");
+$container.height($container.height()-$("#header").height());
 
 // VIDEO
-var VR_ENABLED = false;
 var WIDTH = $container.width();
 var HEIGHT = $container.height();
 var VIEW_ANGLE = 45;
@@ -22,6 +22,12 @@ var mesh;
 var heightMap;
 
 
+var animationState = {
+    vrEnabled: false,
+    rotating: false
+};
+
+
 // start
 main();
 function main() {
@@ -34,8 +40,10 @@ function main() {
 
 
 function initVideo() {
-    renderer = new THREE.WebGLRenderer();
+    renderer = new THREE.WebGLRenderer({alpha:true});
     renderer.setSize(WIDTH, HEIGHT);
+    renderer.setClearColor( 0xaaccff );
+
     $container.append(renderer.domElement);
 
     effect = new THREE.StereoEffect(renderer);
@@ -45,7 +53,7 @@ function initVideo() {
     scene.fog = new THREE.FogExp2( 0xaaccff, 0.0007 );
 
     camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
-    camera.position.set(0, AUDIO_BUFFER_SIZE,-AUDIO_BUFFER_SIZE*1.5);
+    camera.position.set(0, AUDIO_BUFFER_SIZE*0.9,-AUDIO_BUFFER_SIZE);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
     scene.add(camera);
 }
@@ -70,7 +78,8 @@ function createWorld() {
     var height = MEMORY_SIZE;
     var geometry = new THREE.PlaneGeometry(width, height, width-1, height-1);
     var material = new THREE.MeshBasicMaterial({
-        wireframe: true
+        wireframe: true,
+        color: 0x000000
     });
     mesh = new THREE.Mesh( geometry, material );
     mesh.rotateX(-Math.PI/2);
@@ -83,24 +92,28 @@ function createWorld() {
 }
 
 function run() {
-    // render loop
+    // animation loop
     var fps = 60;
     fps = 2.33*32; // 140bpm
     setTimeout(function() {
         requestAnimationFrame(run);
     }, 1000/fps);
 
+    // update world
     update();
 
-
     // render
-    if (VR_ENABLED)effect.render(scene, camera);
-    else renderer.render(scene, camera);
+    if (animationState.vrEnabled)
+        effect.render(scene, camera);
+    else
+        renderer.render(scene, camera);
 }
 
 function update() {
+    // read new audio data
     audioAnalyser.getByteFrequencyData(frequencyData);
 
+    // update heightmap with new audio data
     var l = heightMap.length-AUDIO_BUFFER_SIZE;
     while (l > 0) {
         l -= 1;
@@ -108,23 +121,48 @@ function update() {
     }
     for (var i = 0; i < frequencyData.length; i++) {
         var v = frequencyData[i]/255*10;
-        heightMap[i] = Math.sqrt(v)*AUDIO_BUFFER_SIZE/10;
+        var scaling = AUDIO_BUFFER_SIZE/20;
+        heightMap[i] = Math.sqrt(v)*scaling;
     }
-
+    // update mesh with new heightmap
     for (var i = 0; i < mesh.geometry.vertices.length; i++) {
         mesh.geometry.vertices[i].z = heightMap[i];
     }
 
-    mesh.rotateZ(0.002);
+    // mesh animation
+    var delta = clock.getDelta()*10;
+    if (animationState.rotating) {
+        rotateObject(mesh, delta, -delta, delta);
+    }
 
     mesh.geometry.verticesNeedUpdate = true;
     mesh.geometry.normalsNeedUpdate = true;
 }
 
+function rotateObject(object, degreeX, degreeY, degreeZ){
+
+    degreeX = (degreeX * Math.PI)/180;
+    degreeY = (degreeY * Math.PI)/180;
+    degreeZ = (degreeZ * Math.PI)/180;
+
+    object.rotateX(degreeX);
+    object.rotateY(degreeY);
+    object.rotateZ(degreeZ);
+
+}
+
+
+// dev controls
 window.addEventListener("keydown", function(event) {
-    if (event.which == 86) {
-        VR_ENABLED = !VR_ENABLED;
-        renderer.setSize(WIDTH, HEIGHT);
-        effect.setSize(WIDTH, HEIGHT);
+    switch (event.which) {
+        case 86: // S
+            animationState.vrEnabled = !animationState.vrEnabled;
+            renderer.setSize(WIDTH, HEIGHT);
+            effect.setSize(WIDTH, HEIGHT);
+            break;
+        case 82: // R
+            animationState.rotating = !animationState.rotating;
+
     }
+
 }, true);
