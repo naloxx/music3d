@@ -1,8 +1,7 @@
 var $container = $('#container');
 
-var VR_ENABLED = false;
-
 // VIDEO
+var VR_ENABLED = false;
 var WIDTH = $container.width();
 var HEIGHT = $container.height();
 var VIEW_ANGLE = 45;
@@ -85,9 +84,8 @@ function createWorld() {
 
 function run() {
     // render loop
-    // fps für musikgenres bestimmen?
-    var f = 2.33; // optimal für 140bpm
-    var fps = f*32;
+    var fps = 60;
+    fps = 2.33*32; // 140bpm
     setTimeout(function() {
         requestAnimationFrame(run);
     }, 1000/fps);
