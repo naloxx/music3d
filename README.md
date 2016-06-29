@@ -1,6 +1,5 @@
 # music3d
 
-Läuft zur Zeit nur mit dem lokalen Testserver von Webstorm
+entweder im Browser Cross-Origin Security ausschalten oder über Webstorms lokalen Testserver öffnen
 
 in Webstorm: Rechtsklick auf index.html -> Open in Browser -> Chrome/Firefox
-
