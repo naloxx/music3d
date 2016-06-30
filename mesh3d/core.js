@@ -9,7 +9,7 @@ var inputState = {
 
 
 // select visualizer
-var VISUALIZER = new BasicVisualizer();
+var VISUALIZER = new BlackWhiteVisualizer();
 // inputState.rotating = true; // for blackwhitevisualizer
 
 

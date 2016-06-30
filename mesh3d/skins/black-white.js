@@ -33,7 +33,7 @@ function BlackWhiteVisualizer() {
             color: 0x000000
         });
         mesh = new THREE.Mesh( geometry, material );
-        mesh.rotateX(-Math.PI/2);
+        rotateObject(mesh, -70, 0, 15);
         scene.add(mesh);
 
         heightMap = new Float32Array(AUDIO_BUFFER_SIZE*MEMORY_SIZE);

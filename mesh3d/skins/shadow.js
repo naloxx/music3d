@@ -1,4 +1,4 @@
-function BlackWhiteVisualizer() {
+function ShadowVisualizer() {
     this.initVideo = function() {
         renderer = new THREE.WebGLRenderer({alpha:false});
         renderer.setSize(WIDTH, HEIGHT);
