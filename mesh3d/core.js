@@ -1,7 +1,17 @@
 var $container = $("#container");
 $container.height($container.height()-$("#header").height());
 
-var VISUALIZER = new BlackWhiteVisualizer();
+// track user input
+var inputState = {
+    vrEnabled: false,
+    rotating: false
+};
+
+
+// select visualizer
+var VISUALIZER = new BasicVisualizer();
+// inputState.rotating = true; // for blackwhitevisualizer
+
 
 // VIDEO
 var WIDTH = $container.width();
@@ -21,11 +31,6 @@ var audioContext, audioAnalyser, frequencyData;
 var clock = new THREE.Clock();
 var mesh;
 var heightMap;
-
-var animationState = {
-    vrEnabled: false,
-    rotating: false
-};
 
 
 // start
@@ -64,7 +69,7 @@ function run() {
     VISUALIZER.update();
 
     // render
-    if (animationState.vrEnabled)
+    if (inputState.vrEnabled)
         effect.render(scene, camera);
     else
         renderer.render(scene, camera);
