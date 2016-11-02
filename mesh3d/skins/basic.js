@@ -49,7 +49,9 @@ function BasicVisualizer() {
         for (var i = 0; i < frequencyData.length; i++) {
             var v = frequencyData[i]/255*10;
             var scaling = AUDIO_BUFFER_SIZE/20;
-            heightMap[i] = Math.sqrt(v)*scaling;
+            scaling = 1;
+            //heightMap[i] = Math.sqrt(v)*scaling;
+            heightMap[i] = v*scaling;
         }
         // update mesh with new heightmap
         for (var i = 0; i < mesh.geometry.vertices.length; i++) {

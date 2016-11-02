@@ -7,11 +7,9 @@ var inputState = {
     rotating: false
 };
 
-
 // select visualizer
-var VISUALIZER = new BlackWhiteVisualizer();
-// inputState.rotating = true; // for blackwhitevisualizer
-
+var VISUALIZER;
+VISUALIZER = new BlackWhiteVisualizer();
 
 // VIDEO
 var WIDTH = $container.width();
@@ -23,7 +21,8 @@ var FAR = 10000;
 var scene, renderer, camera, effect, controls;
 
 // AUDIO
-var AUDIO_BUFFER_SIZE = MEMORY_SIZE = 64;
+var AUDIO_BUFFER_SIZE = 64;
+var MEMORY_SIZE = 64;
 var audioContext, audioAnalyser, frequencyData;
 
 
@@ -55,6 +54,29 @@ function initAudio() {
         audioAnalyser.connect(audioContext.destination);
         audioElement.play();
     });
+}
+
+function selectVisualizer() {
+    var selectedSkin = $("#skin option:selected").val();
+    switch (selectedSkin) {
+        case "basic":
+            VISUALIZER = new BasicVisualizer();
+            break;
+        case "black-white":
+            VISUALIZER = new BlackWhiteVisualizer();
+            break;
+        case "red-pulse":
+            VISUALIZER = new RedPulseVisualizer();
+            break;
+        case "shadow":
+            VISUALIZER = new ShadowVisualizer();
+            break;
+        default:
+            VISUALIZER = new BasicVisualizer();
+            break;
+    }
+    VISUALIZER.initVideo();
+    VISUALIZER.createWorld();
 }
 
 function run() {

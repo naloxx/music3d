@@ -9,8 +9,15 @@
 
 	<body>
         <div id="header">
-            <audio id="player" src="../res/music/song.wav" controls/>
+            <audio id="player" src="../res/music/sample.mp3" controls/>
         </div>
+
+        <select id="skin">
+            <option selected="selected" value="basic">Basic</option>
+            <option value="black-white">Black / White</option>
+            <option value="red-pulse">Red Pulse</option>
+            <option value="shadow">Shadow</option>
+        </select>
 
         <div id="container"></div>
 	</body>
@@ -23,9 +30,11 @@
     <script src="skins/basic.js"></script>
     <script src="skins/shadow.js"></script>
     <script src="skins/black-white.js"></script>
+    <script src="skins/red-pulse.js"></script>
 
     <script src="devtools.js"></script>
     <script src="math.js"></script>
     <script src="core.js"></script>
+
 
 </html>

@@ -1,7 +1,7 @@
 // dev controls
 window.addEventListener("keydown", function(event) {
     switch (event.which) {
-        case 86: // S
+        case 86: // V
             inputState.vrEnabled = !inputState.vrEnabled;
             renderer.setSize(WIDTH, HEIGHT);
             effect.setSize(WIDTH, HEIGHT);
@@ -13,4 +13,7 @@ window.addEventListener("keydown", function(event) {
 
 }, true);
 
+$("#skin").on("change", function() {
+    selectVisualizer();
+});
 
