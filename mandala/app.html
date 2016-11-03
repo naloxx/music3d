@@ -28,7 +28,7 @@
 </head>
 <body>
 
-<audio id="player" src="../res/music/sample.mp3" controls></audio>
+<audio id="player" src="../res/music/afterhour.mp3" controls></audio>
 <div id="container">
     <canvas id="canvas"></canvas>
 </div>
@@ -168,8 +168,6 @@
                 /******************************************************************************************************/
                 // animation code
 
-                point.impulseUD += Math.sin(now-starttime)*0.002*avgNorm;
-
 
                 // draw
                 for (var i = 0; i < frequencyData.length; i++) {
@@ -220,9 +218,9 @@
                     ctx.fill();
 
                 }
-//                ctx.beginPath();
-//                ctx.arc(center.x,center.y, radius, 0, Math.PI*2, false);
-//                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(center.x,center.y, radius*1.05, 0, Math.PI*2, false);
+                ctx.stroke();
                 $("#container").css("background-color", rgbToHex(r, g, b));
 
 
