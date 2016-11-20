@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Three</title>
+
+    <style>
+        canvas { width: 100%; height: 100% }
+
+        body {
+            margin: 0;
+            background: black;
+        }
+
+        audio {
+            width:100%;
+        }
+        #container {
+            /*border: 1px solid rgba(255, 140, 0, 0.8);*/
+            width: 100%;
+            height: 96vh;
+            text-align: justify;
+        }
+        #canvas {
+        }
+    </style>
+
+</head>
+<body>
+
+<audio id="player" src="../res/music/boom.mp3" controls></audio>
+<div id="container">
+    <canvas id="canvas"></canvas>
+</div>
+
+<script src="../res/js/lib/three.min.js"></script>
+<script src="../res/js/lib/jquery-3.0.0.min.js"></script>
+
+<script>
+
+    (function() {
+
+        function rgbToHex(r, g, b) {
+            function componentToHex(c) {
+                var hex = c.toString(16);
+                return hex.length == 1 ? "0" + hex : hex;
+            }
+            return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+        }
+
+        /**************************************************************************************************************/
+        // init audio source
+
+        // number of bins
+        var N_BINS = 64;
+
+        // audio source
+        var audioElement = document.getElementById("player");
+        audioElement.play();
+        var context = new AudioContext();
+        var analyser = context.createAnalyser();
+        analyser.fftSize = N_BINS;
+        var frequencyData = new Uint8Array(analyser.frequencyBinCount);
+        audioElement.addEventListener("canplay", function() {
+            var source = context.createMediaElementSource(audioElement);
+            source.connect(analyser);
+            analyser.connect(context.destination);
+        });
+
+        /**************************************************************************************************************/
+        // init animation
+
+        var fps = 145;
+        var now;
+        var then = Date.now();
+        var interval = 1000/fps;
+        var delta;
+
+        var frames = 0;
+        var starttime = Date.now();
+        var currentFps = 0;
+
+        /**************************************************************************************************************/
+        // init drawing
+
+        // canvas
+        var canvas = document.getElementById("canvas");
+        $('#canvas').attr("width",$(window).width());
+        $('#canvas').attr("height",$(window).height());
+
+        var center = {
+            x: canvas.width/2,
+            y: canvas.height/2
+        };
+        var radius = center.y*0.9;
+        var point = {
+            x: 0,
+            y: 0,
+            radius: 10,
+            impulseLR: 0.5,
+            impulseUD: 0.5,
+            LR: 0,
+            UD: 0
+        };
+
+        /**************************************************************************************************************/
+        // render loop
+
+        function update() {
+            requestAnimationFrame(update);
+
+            now = Date.now();
+            delta = now - then;
+
+            frames++;
+            currentFps = Math.round(frames/(now-starttime)*1000);
+
+
+            if(canvas.getContext){}
+            var ctx = canvas.getContext('2d');
+            ctx.strokeStyle = '#FFAA22';
+            ctx.fillStyle = '#FFAA22';
+
+            if (delta > interval) {
+                then = now - (delta % interval);
+
+                // clear the canvas for this loop's animation
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+
+                // analyser
+                analyser.getByteFrequencyData(frequencyData);
+                var avg = 0;
+                var avgBass = 0;
+                var bassLength = frequencyData.length*0.375;
+                var avgMid = 0;
+                var midLength = frequencyData.length*0.625;
+                var avgTop = 0;
+                var topLength = frequencyData.length - midLength;
+
+                for (var i = 0; i < frequencyData.length; i++) {
+                    avg += frequencyData[i];
+                    if (i < bassLength) {
+                        avgBass += frequencyData[i];
+                    } else if (i < midLength) {
+                        avgMid += frequencyData[i];
+                    } else {
+                        avgTop += frequencyData[i];
+                    }
+                }
+                avg = Math.round(avg/(N_BINS/2));
+                var avgNorm = avg/255;
+                avgNorm *= avgNorm/255;
+
+                avgBass = Math.round(avgBass/bassLength);
+                var avgBassNorm = avgBass/255;
+                avgBassNorm *= avgBassNorm;
+
+                avgMid = Math.round(avgMid/midLength);
+                var avgMidNorm = avgMid/255;
+
+                avgTop = Math.round(avgTop/topLength);
+                var avgTopNorm = avgTop/255;
+
+                var r = avg;
+                var g = Math.round(avg/2);
+                var b = 0;
+
+                /******************************************************************************************************/
+                // animation code
+
+
+                // draw
+                for (var i = 0; i < frequencyData.length; i++) {
+                    var step = Math.PI*4/N_BINS;
+
+                    // kreis segment
+//                    ctx.beginPath();
+//                    ctx.arc(center.x,center.y, frequencyData[i], i*step, (i+1)*step, false);
+//                    ctx.stroke();
+
+                    // linien außen
+                    ctx.moveTo(center.x, center.y);
+                    ctx.lineTo(center.x+Math.cos(i*step)*radius, center.y+Math.sin(i*step)*radius);
+                    ctx.moveTo(center.x, center.y);
+                    ctx.lineTo(center.x+Math.cos((i+1)*step)*radius, center.y+Math.sin((i+1)*step)*radius);
+                    ctx.stroke();
+
+                    // punkte
+                    // normalisierte koordinaten
+                    var moveLR = point.impulseLR;
+                    var moveUD = point.impulseUD;
+
+
+
+                    for (var j = 0; j < frequencyData.length; j++) {
+                        point.x = center.x+(Math.cos(i*step+(Math.PI*2/N_BINS)*moveLR*2)*radius*j/frequencyData.length);
+                        point.y = center.y+(Math.sin(i*step+(Math.PI*2/N_BINS)*moveLR*2)*radius*j/frequencyData.length);
+                        point.radius = frequencyData[j]/255*5+0.2;
+                        ctx.beginPath();
+                        var colorHelper = 22;
+                        var color = "#FFAA"+colorHelper;
+                        ctx.fillStyle = color;
+                        ctx.strokeStyle = color;
+                        ctx.arc(point.x, point.y, point.radius, 0, Math.PI*2, false);
+                        ctx.fill();
+                    }
+
+
+//
+//                    point.x = center.x+(Math.cos(i*step+(Math.PI*2/N_BINS)*moveLR*2)*radius*moveUD);
+//                    point.y = center.y+(Math.sin(i*step+(Math.PI*2/N_BINS)*moveLR*2)*radius*moveUD);
+//                    point.radius = avgTopNorm*30+1;
+//                    ctx.beginPath();
+//                    ctx.fillStyle = '#FFAA22';
+//                    ctx.strokeStyle = '#FFAA22';
+//                    ctx.arc(point.x, point.y, point.radius, 0, Math.PI*2, false);
+//                    ctx.fill();
+//
+//                    point.x = center.x+(Math.cos(i*step+(Math.PI*2/N_BINS)*moveLR*2)*radius*1.5*moveUD);
+//                    point.y = center.y+(Math.sin(i*step+(Math.PI*2/N_BINS)*moveLR*2)*radius*1.5*moveUD);
+//                    point.radius = avgMidNorm*40+1;
+//                    ctx.beginPath();
+//                    ctx.fillStyle = '#FF9911';
+//                    ctx.strokeStyle = '#FF9911';
+//                    ctx.arc(point.x, point.y, point.radius, 0, Math.PI*2, false);
+//                    ctx.fill();
+//
+//                    point.x = center.x+(Math.cos(i*step+(Math.PI*2/N_BINS)*moveLR*2)*radius*2*moveUD);
+//                    point.y = center.y+(Math.sin(i*step+(Math.PI*2/N_BINS)*moveLR*2)*radius*2*moveUD);
+//                    point.radius = avgBassNorm*20+1;
+//                    ctx.beginPath();
+//                    ctx.fillStyle = '#FF8800';
+//                    ctx.strokeStyle = '#FF8800';
+//                    ctx.arc(point.x, point.y, point.radius, 0, Math.PI*2, false);
+//                    ctx.fill();
+
+                }
+                ctx.beginPath();
+                ctx.arc(center.x,center.y, radius*1.05, 0, Math.PI*2, false);
+                ctx.stroke();
+                $("#container").css("background-color", rgbToHex(r, g, b));
+
+
+                /******************************************************************************************************/
+            }
+        }
+
+        /**************************************************************************************************************/
+
+        update();
+
+        /**************************************************************************************************************/
+
+    })();
+
+</script>
+
+</body>
+</html>

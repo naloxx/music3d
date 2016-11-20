@@ -9,7 +9,7 @@ var inputState = {
 
 // select visualizer
 var VISUALIZER;
-VISUALIZER = new BlackWhiteVisualizer();
+VISUALIZER = new RedPulseVisualizer();
 
 // VIDEO
 var WIDTH = $container.width();
