@@ -195,7 +195,7 @@
                     for (var j = 0; j < frequencyData.length; j++) {
                         point.x = center.x+(Math.cos(i*step+(Math.PI*2/N_BINS)*moveLR*2)*radius*j/frequencyData.length);
                         point.y = center.y+(Math.sin(i*step+(Math.PI*2/N_BINS)*moveLR*2)*radius*j/frequencyData.length);
-                        point.radius = frequencyData[j]/255*5+0.2;
+                        point.radius = frequencyData[frequencyData.length-j]/255*5+0.2;
                         ctx.beginPath();
                         var colorHelper = 22;
                         var color = "#FFAA"+colorHelper;
